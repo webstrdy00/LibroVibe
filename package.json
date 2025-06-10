@@ -1,41 +1,56 @@
 {
-  "name": "librovibe",
-  "private": true,
-  "version": "0.0.0",
+  "name": "LibroVibe",
+  "version": "0.1.0",
   "type": "module",
+  "description": "교보문고, YES24, 알라딘 주간 베스트셀러를 한 눈에 비교하는 Chrome Extension",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write .",
+    "prepare": "husky install"
   },
   "dependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.2"
+    "@headlessui/react": "^1.7.18",
+    "@tanstack/react-query": "^5.17.19",
+    "@tanstack/react-virtual": "^3.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "^1.0.14",
-    "@eslint/js": "^9.25.0",
-    "@testing-library/react": "^16.3.0",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "@typescript-eslint/eslint-plugin": "^8.33.1",
-    "@vitejs/plugin-react": "^4.4.1",
-    "autoprefixer": "^10.4.21",
-    "eslint": "^9.25.0",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^16.0.0",
-    "jsdom": "^26.1.0",
-    "postcss": "^8.5.4",
-    "prettier": "^3.5.3",
-    "tailwindcss": "^4.1.8",
-    "typescript": "~5.8.3",
-    "typescript-eslint": "^8.30.1",
-    "vite": "^6.3.5",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.2"
+    "@crxjs/vite-plugin": "^2.0.0-beta.23",
+    "@testing-library/react": "^14.1.2",
+    "@types/chrome": "^0.0.260",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "husky": "^8.0.3",
+    "jsdom": "^24.0.0",
+    "lint-staged": "^15.2.0",
+    "postcss": "^8.4.33",
+    "prettier": "^3.2.4",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12",
+    "vitest": "^1.2.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": "prettier --write"
   }
 }

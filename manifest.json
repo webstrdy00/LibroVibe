@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "LibroVibe - 베스트셀러 한눈에 보기",
+  "description": "교보문고, YES24, 알라딘 주간 베스트셀러를 한 곳에서 비교해보세요",
+  "version": "0.1.0",
+  "permissions": ["storage", "alarms"],
+  "host_permissions": [
+    "https://product.kyobobook.co.kr/*",
+    "https://www.yes24.com/*",
+    "https://www.aladin.co.kr/*"
+  ],
+  "background": {
+    "service_worker": "src/background/index.ts",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "options_page": "options.html"
+}

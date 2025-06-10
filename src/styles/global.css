@@ -1,0 +1,67 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* 커스텀 스타일 */
+@layer base {
+  /* 스크롤바 스타일링 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500 dark:bg-gray-500;
+  }
+
+  /* 포커스 스타일 */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 dark:ring-offset-gray-900;
+  }
+
+  /* 부드러운 애니메이션 */
+  * {
+    @apply transition-colors duration-150;
+  }
+}
+
+@layer components {
+  /* 라인 클램프 유틸리티 */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  /* 테두리 3px */
+  .border-3 {
+    border-width: 3px;
+  }
+}
+
+/* 팝업 크기 제한 */
+body {
+  margin: 0;
+  min-width: 360px;
+}
+
+/* 다크모드 배경 */
+html.dark {
+  color-scheme: dark;
+}
