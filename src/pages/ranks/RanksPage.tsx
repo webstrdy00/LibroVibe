@@ -124,7 +124,7 @@ export function RanksPage() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <h1 className="text-xl font-bold">📚 BookRanker</h1>
+              <h1 className="text-xl font-bold">📚 LibroVibe</h1>
               <span className="text-sm text-gray-500 dark:text-gray-400">
                 베스트셀러 종합 순위
               </span>

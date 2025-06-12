@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Switch } from "@headlessui/react";
 import { StorageSchema } from "@/types";
 
@@ -60,7 +60,7 @@ export function OptionsPage() {
   return (
     <div className="min-h-screen bg-bgLight dark:bg-bgDark text-textBase dark:text-textInverse">
       <div className="max-w-2xl mx-auto p-8">
-        <h1 className="text-2xl font-bold mb-8">📚 BookRanker 설정</h1>
+        <h1 className="text-2xl font-bold mb-8">📚 LibroVibe 설정</h1>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 space-y-6">
           {/* 새로고침 주기 */}
@@ -163,7 +163,7 @@ export function OptionsPage() {
 
         {/* 정보 섹션 */}
         <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-3">BookRanker 정보</h2>
+          <h2 className="text-lg font-semibold mb-3">LibroVibe 정보</h2>
           <dl className="space-y-2 text-sm">
             <div className="flex gap-2">
               <dt className="font-medium">버전:</dt>
@@ -184,7 +184,7 @@ export function OptionsPage() {
         <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
           <p>문의사항이나 버그 리포트는</p>
           <a
-            href="https://github.com/yourusername/bookranker/issues"
+            href="https://github.com/webstrdy00/LibroVibe/issues"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline"

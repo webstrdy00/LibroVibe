@@ -17,7 +17,7 @@ const DEFAULT_SETTINGS: StorageSchema["settings"] = {
 
 // 초기화
 chrome.runtime.onInstalled.addListener(async () => {
-  console.log("BookRanker installed");
+  console.log("LibroVibe installed");
 
   // 기본 설정 저장
   const { settings } = await chrome.storage.local.get("settings");
@@ -138,7 +138,7 @@ async function fetchAladinTop100(): Promise<BookItem[]> {
 }
 
 // 메시지 리스너
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request.action === "fetchKyoboTop10") {
     fetchKyoboTop10().then(sendResponse);
     return true; // 비동기 응답을 위해

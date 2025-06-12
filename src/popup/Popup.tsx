@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BookItem } from "@/types";
 import { BookCard } from "@/components/BookCard";
 import { LoadingSpinner } from "@/components/LoadingSpinner";

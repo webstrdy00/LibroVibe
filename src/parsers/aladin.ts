@@ -29,7 +29,7 @@ export class AladinParser implements Parser {
         ".ss_book_list li:first-child"
       );
       const priceElement = element.querySelector(".ss_p2 b span");
-      const linkElement = element.querySelector(".bo3 b") as HTMLAnchorElement;
+      // const linkElement = element.querySelector(".bo3 b") as HTMLAnchorElement;
       const coverElement = element.querySelector(
         ".flipcover_in img.front_cover"
       ) as HTMLImageElement;
