@@ -1,7 +1,7 @@
 import { KyoboParser } from "@/parsers/kyobo";
 import { Yes24Parser } from "@/parsers/yes24";
 import { AladinParser } from "@/parsers/aladin";
-import { StorageSchema, BookItem } from "@/types";
+import { StorageSchema, BookItem, Parser } from "@/types";
 
 // 파서 인스턴스
 const kyoboParser = new KyoboParser();
@@ -73,6 +73,77 @@ async function fetchKyoboTop10(): Promise<BookItem[]> {
   }
 }
 
+// 범용 베스트셀러 페처 함수
+interface FetchConfig {
+  parser: Parser;
+  url?: string; // URL이 없으면 parser의 fetchTop100 사용
+  storageKey: string;
+  lastFetchedKey: string;
+  sourceName: string;
+}
+
+async function fetchAndStoreBestsellers(
+  config: FetchConfig
+): Promise<BookItem[]> {
+  const { parser, url, storageKey, lastFetchedKey, sourceName } = config;
+
+  try {
+    let html: string;
+
+    if (url) {
+      // URL이 제공된 경우 직접 fetch
+      const response = await fetch(url);
+      html = await response.text();
+    } else {
+      // 알라딘처럼 동적 URL이 필요한 경우
+      if ("generateBestsellerURL" in parser) {
+        const dynamicUrl = (parser as any).generateBestsellerURL();
+        const response = await fetch(dynamicUrl);
+        html = await response.text();
+      } else {
+        throw new Error(
+          `No URL provided and parser doesn't support dynamic URL generation`
+        );
+      }
+    }
+
+    // 1. 파싱 전 구조 검증
+    if (!parser.validateStructure(html)) {
+      throw new Error(
+        `${sourceName} site structure may have changed. Please check the website structure.`
+      );
+    }
+
+    const books = parser.parse(html);
+
+    // 2. 파싱 결과 검증
+    if (books.length === 0) {
+      console.warn(
+        `${sourceName}: No books parsed. Site structure might have changed.`
+      );
+    }
+
+    if (books.length > 0) {
+      await chrome.storage.local.set({
+        [storageKey]: books,
+        [lastFetchedKey]: Date.now(),
+      });
+      console.log(`${sourceName}: Successfully fetched ${books.length} books`);
+    }
+
+    return books;
+  } catch (error) {
+    // 구체적인 에러 로깅
+    console.error(`Failed to fetch ${sourceName}:`, error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      timestamp: new Date().toISOString(),
+      source: `${sourceName}Parser`,
+    });
+    return [];
+  }
+}
+
 // 모든 베스트셀러 가져오기
 async function fetchAllBestsellers() {
   const tasks = [fetchKyoboTop100(), fetchYes24Top100(), fetchAladinTop100()];
@@ -82,139 +153,35 @@ async function fetchAllBestsellers() {
 
 // 교보문고 Top 100
 async function fetchKyoboTop100(): Promise<BookItem[]> {
-  try {
-    const response = await fetch(
-      "https://product.kyobobook.co.kr/bestseller/online"
-    );
-    const html = await response.text();
-
-    // 1. 파싱 전 구조 검증
-    if (!kyoboParser.validateStructure(html)) {
-      throw new Error(
-        "Kyobo site structure may have changed. Please check the website structure."
-      );
-    }
-
-    const books = kyoboParser.parse(html);
-
-    // 2. 파싱 결과 검증
-    if (books.length === 0) {
-      console.warn(
-        "Kyobo: No books parsed. Site structure might have changed."
-      );
-    }
-
-    if (books.length > 0) {
-      await chrome.storage.local.set({
-        kyoboTop100: books,
-        "lastFetched.kyoboTop100": Date.now(),
-      });
-      console.log(`Kyobo: Successfully fetched ${books.length} books`);
-    }
-
-    return books;
-  } catch (error) {
-    // 2. 에러를 더 구체적으로 기록
-    console.error("Failed to fetch Kyobo Top 100:", error);
-    console.error("Error details:", {
-      message: error instanceof Error ? error.message : "Unknown error",
-      timestamp: new Date().toISOString(),
-      source: "KyoboParser",
-    });
-    // UI에서 이 에러를 활용할 수 있도록 빈 배열 반환
-    return [];
-  }
+  return fetchAndStoreBestsellers({
+    parser: kyoboParser,
+    url: "https://product.kyobobook.co.kr/bestseller/online",
+    storageKey: "kyoboTop100",
+    lastFetchedKey: "lastFetched.kyoboTop100",
+    sourceName: "Kyobo",
+  });
 }
 
 // YES24 Top 100
 async function fetchYes24Top100(): Promise<BookItem[]> {
-  try {
-    const response = await fetch(
-      "https://www.yes24.com/Product/Category/BestSeller?categoryNumber=001&pageNumber=1&pageSize=120"
-    );
-    const html = await response.text();
-
-    // 1. 파싱 전 구조 검증
-    if (!yes24Parser.validateStructure(html)) {
-      throw new Error(
-        "YES24 site structure may have changed. Please check the website structure."
-      );
-    }
-
-    const books = yes24Parser.parse(html);
-
-    // 2. 파싱 결과 검증
-    if (books.length === 0) {
-      console.warn(
-        "YES24: No books parsed. Site structure might have changed."
-      );
-    }
-
-    if (books.length > 0) {
-      await chrome.storage.local.set({
-        yes24Top100: books,
-        "lastFetched.yes24Top100": Date.now(),
-      });
-      console.log(`YES24: Successfully fetched ${books.length} books`);
-    }
-
-    return books;
-  } catch (error) {
-    // 2. 에러를 더 구체적으로 기록
-    console.error("Failed to fetch YES24 Top 100:", error);
-    console.error("Error details:", {
-      message: error instanceof Error ? error.message : "Unknown error",
-      timestamp: new Date().toISOString(),
-      source: "YES24Parser",
-    });
-    // UI에서 이 에러를 활용할 수 있도록 빈 배열 반환
-    return [];
-  }
+  return fetchAndStoreBestsellers({
+    parser: yes24Parser,
+    url: "https://www.yes24.com/Product/Category/BestSeller?categoryNumber=001&pageNumber=1&pageSize=120",
+    storageKey: "yes24Top100",
+    lastFetchedKey: "lastFetched.yes24Top100",
+    sourceName: "YES24",
+  });
 }
 
 // 알라딘 Top 100
 async function fetchAladinTop100(): Promise<BookItem[]> {
-  try {
-    // 동적 URL 생성을 위해 파서의 fetchTop100 사용하되 구조 검증 추가
-    const response = await fetch(aladinParser.generateBestsellerURL());
-    const html = await response.text();
-
-    // 1. 파싱 전 구조 검증
-    if (!aladinParser.validateStructure(html)) {
-      throw new Error(
-        "Aladin site structure may have changed. Please check the website structure."
-      );
-    }
-
-    const books = aladinParser.parse(html);
-
-    // 2. 파싱 결과 검증
-    if (books.length === 0) {
-      console.warn(
-        "Aladin: No books parsed. Site structure might have changed."
-      );
-    }
-
-    if (books.length > 0) {
-      await chrome.storage.local.set({
-        aladinTop100: books,
-        "lastFetched.aladinTop100": Date.now(),
-      });
-      console.log(`Aladin: Successfully fetched ${books.length} books`);
-    }
-
-    return books;
-  } catch (error) {
-    // 2. 에러를 더 구체적으로 기록
-    console.error("Failed to fetch Aladin Top 100:", error);
-    console.error("Error details:", {
-      message: error instanceof Error ? error.message : "Unknown error",
-      timestamp: new Date().toISOString(),
-      source: "AladinParser",
-    });
-    // UI에서 이 에러를 활용할 수 있도록 빈 배열 반환
-    return [];
-  }
+  return fetchAndStoreBestsellers({
+    parser: aladinParser,
+    // URL을 제공하지 않으면 동적 URL 생성 로직 사용
+    storageKey: "aladinTop100",
+    lastFetchedKey: "lastFetched.aladinTop100",
+    sourceName: "Aladin",
+  });
 }
 
 // 메시지 리스너

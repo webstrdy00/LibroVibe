@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { BookItem, Bookstore } from "@/types";
 import { BookCard } from "@/components/BookCard";
@@ -35,7 +35,7 @@ export function RanksPage() {
     aladin: 0,
   });
 
-  const parentRef = React.useRef<HTMLDivElement>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
 
   // 가상화된 리스트
   const currentBooks = useMemo(() => books[activeTab], [books, activeTab]);
@@ -99,12 +99,26 @@ export function RanksPage() {
   const fetchAllData = async () => {
     setLoading({ kyobo: true, yes24: true, aladin: true });
 
-    await chrome.runtime.sendMessage({ action: "fetchAllBestsellers" });
+    try {
+      // sendMessage가 완료될 때까지 기다림
+      const response = await chrome.runtime.sendMessage({
+        action: "fetchAllBestsellers",
+      });
 
-    // 데이터 다시 로드
-    setTimeout(async () => {
-      await loadInitialData();
-    }, 2000);
+      if (response?.success) {
+        // 완료된 후 즉시 데이터 다시 로드
+        await loadInitialData();
+      } else {
+        // 에러 처리 (예: 에러 메시지 표시)
+        console.error("Failed to fetch all bestsellers from background.");
+        // 로딩 상태 원복
+        setLoading({ kyobo: false, yes24: false, aladin: false });
+      }
+    } catch (error) {
+      console.error("Error fetching bestsellers:", error);
+      // 에러 발생 시 로딩 상태 원복
+      setLoading({ kyobo: false, yes24: false, aladin: false });
+    }
   };
 
   const handleRefresh = async () => {
