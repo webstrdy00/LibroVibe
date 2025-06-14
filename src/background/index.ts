@@ -83,18 +83,45 @@ async function fetchAllBestsellers() {
 // 교보문고 Top 100
 async function fetchKyoboTop100(): Promise<BookItem[]> {
   try {
-    const books = await kyoboParser.fetchTop100();
+    const response = await fetch(
+      "https://product.kyobobook.co.kr/bestseller/online"
+    );
+    const html = await response.text();
+
+    // 1. 파싱 전 구조 검증
+    if (!kyoboParser.validateStructure(html)) {
+      throw new Error(
+        "Kyobo site structure may have changed. Please check the website structure."
+      );
+    }
+
+    const books = kyoboParser.parse(html);
+
+    // 2. 파싱 결과 검증
+    if (books.length === 0) {
+      console.warn(
+        "Kyobo: No books parsed. Site structure might have changed."
+      );
+    }
 
     if (books.length > 0) {
       await chrome.storage.local.set({
         kyoboTop100: books,
         "lastFetched.kyoboTop100": Date.now(),
       });
+      console.log(`Kyobo: Successfully fetched ${books.length} books`);
     }
 
     return books;
   } catch (error) {
+    // 2. 에러를 더 구체적으로 기록
     console.error("Failed to fetch Kyobo Top 100:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      timestamp: new Date().toISOString(),
+      source: "KyoboParser",
+    });
+    // UI에서 이 에러를 활용할 수 있도록 빈 배열 반환
     return [];
   }
 }
@@ -102,18 +129,45 @@ async function fetchKyoboTop100(): Promise<BookItem[]> {
 // YES24 Top 100
 async function fetchYes24Top100(): Promise<BookItem[]> {
   try {
-    const books = await yes24Parser.fetchTop100();
+    const response = await fetch(
+      "https://www.yes24.com/Product/Category/BestSeller?categoryNumber=001&pageNumber=1&pageSize=120"
+    );
+    const html = await response.text();
+
+    // 1. 파싱 전 구조 검증
+    if (!yes24Parser.validateStructure(html)) {
+      throw new Error(
+        "YES24 site structure may have changed. Please check the website structure."
+      );
+    }
+
+    const books = yes24Parser.parse(html);
+
+    // 2. 파싱 결과 검증
+    if (books.length === 0) {
+      console.warn(
+        "YES24: No books parsed. Site structure might have changed."
+      );
+    }
 
     if (books.length > 0) {
       await chrome.storage.local.set({
         yes24Top100: books,
         "lastFetched.yes24Top100": Date.now(),
       });
+      console.log(`YES24: Successfully fetched ${books.length} books`);
     }
 
     return books;
   } catch (error) {
+    // 2. 에러를 더 구체적으로 기록
     console.error("Failed to fetch YES24 Top 100:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      timestamp: new Date().toISOString(),
+      source: "YES24Parser",
+    });
+    // UI에서 이 에러를 활용할 수 있도록 빈 배열 반환
     return [];
   }
 }
@@ -121,18 +175,44 @@ async function fetchYes24Top100(): Promise<BookItem[]> {
 // 알라딘 Top 100
 async function fetchAladinTop100(): Promise<BookItem[]> {
   try {
-    const books = await aladinParser.fetchTop100();
+    // 동적 URL 생성을 위해 파서의 fetchTop100 사용하되 구조 검증 추가
+    const response = await fetch(aladinParser.generateBestsellerURL());
+    const html = await response.text();
+
+    // 1. 파싱 전 구조 검증
+    if (!aladinParser.validateStructure(html)) {
+      throw new Error(
+        "Aladin site structure may have changed. Please check the website structure."
+      );
+    }
+
+    const books = aladinParser.parse(html);
+
+    // 2. 파싱 결과 검증
+    if (books.length === 0) {
+      console.warn(
+        "Aladin: No books parsed. Site structure might have changed."
+      );
+    }
 
     if (books.length > 0) {
       await chrome.storage.local.set({
         aladinTop100: books,
         "lastFetched.aladinTop100": Date.now(),
       });
+      console.log(`Aladin: Successfully fetched ${books.length} books`);
     }
 
     return books;
   } catch (error) {
+    // 2. 에러를 더 구체적으로 기록
     console.error("Failed to fetch Aladin Top 100:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      timestamp: new Date().toISOString(),
+      source: "AladinParser",
+    });
+    // UI에서 이 에러를 활용할 수 있도록 빈 배열 반환
     return [];
   }
 }

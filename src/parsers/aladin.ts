@@ -1,12 +1,29 @@
 import { BookItem, Parser } from "@/types";
 
 export class AladinParser implements Parser {
-  private readonly TOP100_URL =
-    "https://www.aladin.co.kr/shop/common/wbest.aspx?BranchType=1&CID=0&Year=2024&Month=12&Week=2&BestType=Bestseller&MaxPageIndex=10&page=1&cnt=1000&SortOrder=1";
+  public generateBestsellerURL(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1; // getMonth()는 0부터 시작
+
+    // 현재 날짜가 속한 주차 계산
+    const firstDayOfMonth = new Date(year, now.getMonth(), 1);
+    const firstDayWeekday = firstDayOfMonth.getDay(); // 0: 일요일, 1: 월요일, ...
+    const currentDate = now.getDate();
+
+    // 월의 첫 번째 일요일을 기준으로 주차 계산
+    const adjustedDate = currentDate + firstDayWeekday;
+    const week = Math.ceil(adjustedDate / 7);
+
+    return `https://www.aladin.co.kr/shop/common/wbest.aspx?BranchType=1&CID=0&Year=${year}&Month=${month}&Week=${week}&BestType=Bestseller&MaxPageIndex=10&page=1&cnt=1000&SortOrder=1`;
+  }
 
   async fetchTop100(): Promise<BookItem[]> {
     try {
-      const response = await fetch(this.TOP100_URL);
+      const url = this.generateBestsellerURL();
+      console.log(`Fetching Aladin bestsellers from: ${url}`);
+
+      const response = await fetch(url);
       const html = await response.text();
       return this.parse(html);
     } catch (error) {
