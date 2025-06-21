@@ -133,11 +133,6 @@ LibroVibe/
 
 이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 
-## 🙏 감사의 말
-
-- 베스트셀러 데이터를 제공하는 교보문고, YES24, 알라딘
-- 오픈소스 커뮤니티의 모든 기여자들
-
 ## 📞 문의
 
 - 이슈: [GitHub Issues](https://github.com/webstrdy00/LibroVibe/issues)
