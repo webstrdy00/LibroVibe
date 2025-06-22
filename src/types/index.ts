@@ -51,4 +51,5 @@ export interface FetchResult<T> {
 export interface Parser {
   parse(html: string): BookItem[];
   validateStructure(html: string): boolean;
+  fetchTop100?(): Promise<BookItem[]>;
 }

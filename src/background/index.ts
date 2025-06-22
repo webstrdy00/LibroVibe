@@ -57,16 +57,60 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 // 교보문고 Top 10 가져오기
 async function fetchKyoboTop10(): Promise<BookItem[]> {
   try {
-    const books = await kyoboParser.fetchTop10();
+    // HTML 페이지에서 크롤링 - 새로운 도메인 사용
+    const url = "https://store.kyobobook.co.kr/bestseller/online/weekly";
 
-    if (books.length > 0) {
-      await chrome.storage.local.set({
-        kyoboTop10: books,
-        "lastFetched.kyoboTop10": Date.now(),
-      });
+    console.log("Fetching HTML from:", url);
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      },
+    });
+
+    console.log("Response status:", response.status);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return books;
+    const html = await response.text();
+    console.log("HTML response length:", html.length);
+    console.log("HTML preview (first 500 chars):", html.substring(0, 500));
+
+    // HTML 구조 검증
+    if (!kyoboParser.validateStructure(html)) {
+      console.warn(
+        "HTML structure validation failed, but attempting to parse anyway..."
+      );
+    }
+
+    // HTML 파싱
+    const books = kyoboParser.parse(html);
+    console.log(`Parsed ${books.length} books from HTML`);
+
+    if (books.length === 0) {
+      console.warn("No books parsed. HTML structure might have changed.");
+      console.log("HTML sample for debugging:", html.substring(0, 2000));
+    }
+
+    // Top 10만 선택
+    const top10 = books.slice(0, 10);
+
+    if (top10.length > 0) {
+      await chrome.storage.local.set({
+        kyoboTop10: top10,
+        "lastFetched.kyoboTop10": Date.now(),
+      });
+      console.log(`Successfully stored ${top10.length} books`);
+    }
+
+    return top10;
   } catch (error) {
     console.error("Failed to fetch Kyobo Top 10:", error);
     return [];
@@ -155,7 +199,7 @@ async function fetchAllBestsellers() {
 async function fetchKyoboTop100(): Promise<BookItem[]> {
   return fetchAndStoreBestsellers({
     parser: kyoboParser,
-    url: "https://product.kyobobook.co.kr/bestseller/online",
+    url: "https://store.kyobobook.co.kr/bestseller/online/weekly",
     storageKey: "kyoboTop100",
     lastFetchedKey: "lastFetched.kyoboTop100",
     sourceName: "Kyobo",
